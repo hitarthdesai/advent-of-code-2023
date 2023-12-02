@@ -11,31 +11,28 @@ fn main() {
 
 fn part1(line: &str) -> i32 {
     let parts = line.split(':');
-    let game_id = parts.clone().nth(0).unwrap().split(' ').nth(1).unwrap();
+    let game_id: i32 = parts.clone().nth(0).unwrap().split(' ').nth(1).unwrap().parse().unwrap();
     let sets = parts.clone().nth(1).unwrap().split("; ").map(|s| s.trim().split(", "));
 
-    let mut counts = [0, 0, 0];
     for set in sets {
+        let mut is_set_valid = true;
         for s in set {
             let mut colors = s.split(" ");
             let f: i32 = colors.next().unwrap().parse().unwrap();
             let color = colors.next().unwrap();
 
             match color {
-                "red" => counts[0] += f,
-                "green" => counts[1] += f,
-                "blue" => counts[2] += f,
+                "red" => is_set_valid &= f <= MAX[0],
+                "green" => is_set_valid &= f <= MAX[1],
+                "blue" => is_set_valid &= f <= MAX[2],
                 _ => {},
+            }
+
+            if is_set_valid == false {
+                return 0
             }
         }
     }
 
-    let is_valid = counts.iter().enumerate().all(|(i, n)| n <= &MAX[i]);
-
-    let return_val: i32 = match is_valid {
-        true => game_id.parse().unwrap(),
-        false => 0
-    };
-
-    return_val
+    return game_id
 }

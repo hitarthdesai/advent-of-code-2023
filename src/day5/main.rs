@@ -1,15 +1,19 @@
 use std::{fs};
+use std::ops::Index;
 
 fn main() {
     let input = fs::read_to_string("input.txt").unwrap();
     let input_lines: Vec<&str> = input.split("\n\n").collect();
-    let seeds: Vec<i64> = input_lines.first().unwrap().split(": ").last().unwrap().split_whitespace().clone().map(|s| s.parse().unwrap()).collect();
 
-    let locations = seeds.iter().map(|s| part1(&s, &input_lines[1..].to_vec()));
+    let seeds: Vec<i64> = input_lines.first().unwrap().split(": ").last().unwrap().split_whitespace().clone().map(|s| s.parse().unwrap()).collect();
+    let locations = seeds.iter().map(|s| part1(&s, &input_lines));
     println!("Part1: {}",  locations.min().unwrap());
+    println!("Part2: {}",  part2(&input_lines));
+
 }
 
-fn part1(seed: &i64, relations: &Vec<& str>) -> i64 {
+fn part1(seed: &i64, input_lines: &Vec<&str>) -> i64 {
+    let relations = input_lines[1..].to_vec();
     let mut to_find = *seed;
 
     for r in relations {
@@ -34,33 +38,20 @@ fn part1(seed: &i64, relations: &Vec<& str>) -> i64 {
     return to_find
 }
 
-// fn part1(seeds: &Vec<&str>, map: &HashMap<&str, Vec<(i64, i64)>>) -> i64 {
-//     let mut lowest_location = i64::MAX;
-//     let num_keys = map.keys().len();
-//
-//     for _s in seeds {
-//         let mut curr_key = "seed";
-//         let mut s: i64 = _s.parse().unwrap();
-//
-//         for _i in 0..num_keys {
-//             let key = map.keys().find(|s| s.starts_with(curr_key));
-//
-//             match key {
-//                 None => { },
-//                 Some(t) => {
-//                     curr_key = t.split("-").last().unwrap();
-//                     s = map.get(t).unwrap().iter().find(|t| t.0 == s).unwrap_or(&(s, s)).1;
-//
-//                     if curr_key == "location" {
-//                         lowest_location = min(lowest_location, s)
-//                     }
-//                 }
-//             }
-//
-//
-//         }
-//
-//     }
-//
-//     return lowest_location
-// }
+fn part2(input_lines: &Vec<&str>) -> i64 {
+    let mut min_location = i64::MAX;
+    let ranges: Vec<&str> = input_lines.first().unwrap().split(": ").last().unwrap().split_whitespace().collect();
+    let numbers = (0..ranges.len()).step_by(2);
+
+    for i in numbers {
+        let range_start: i64 = ranges.clone().index(i).parse().unwrap();
+        let count: i64 = ranges.index(i+1).parse().unwrap();
+
+        for j in range_start..range_start+count {
+            let location = part1(&j, &input_lines);
+            min_location = min_location.min(location);
+        };
+    }
+
+    return min_location
+}

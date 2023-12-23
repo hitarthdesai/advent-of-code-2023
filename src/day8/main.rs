@@ -38,13 +38,10 @@ fn main() {
     }
 
     println!("Part1: {}",  part1(&moves, &nodes));
-
-
-
-    // println!("Part2: {}",  part2(&times, &distances));
+    println!("Part2: {}",  part2(&moves, &nodes));
 }
 
-fn part1(moves: &Vec<char>, nodes: &HashMap<&str, Node>) -> u32 {
+fn part1(moves: &Vec<char>, nodes: &HashMap<&str, Node>) -> u64 {
     let mut curr_node = nodes.get("AAA").unwrap();
     let mut num_moves = 0;
 
@@ -61,4 +58,46 @@ fn part1(moves: &Vec<char>, nodes: &HashMap<&str, Node>) -> u32 {
     }
 
     return num_moves
+}
+
+fn lcm(nums: &Vec<u64>) -> u64 {
+    if nums.len() == 1 {
+        return nums[0];
+    }
+    let a = nums[0];
+    let b = lcm(&nums[1..].to_vec());
+    a * b / gcd(a, b)
+}
+
+fn gcd(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        return a;
+    }
+    gcd(b, a % b)
+}
+
+fn part2(moves: &Vec<char>, nodes: &HashMap<&str, Node>) -> u64 {
+    let mut total_moves:Vec<u64> = Vec::new();
+    let starting_points: Vec<&&str> = nodes.keys().filter(|s| s.ends_with("A")).collect();
+
+    for s in starting_points {
+        let mut num_moves = 0;
+        let mut curr_node = nodes.get(*s).unwrap();
+
+        for _move in moves.iter().cycle() {
+            if curr_node.key.ends_with("Z") { break }
+
+            curr_node = match _move {
+                'R' => { nodes.get(curr_node.right).unwrap() }
+                'L' => { nodes.get(curr_node.left).unwrap() }
+                _t => { curr_node }
+            };
+
+            num_moves += 1;
+        }
+
+        total_moves.push(num_moves)
+    }
+
+    return lcm(&total_moves)
 }
